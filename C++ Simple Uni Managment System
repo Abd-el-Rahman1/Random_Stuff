@@ -1,0 +1,581 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+#include <iomanip>
+#include <conio.h>
+#define _FSTREAM_
+
+using namespace std; 
+
+void MainMenu();								//Main menu with choices.
+void Signup();									//Sign up page for entering the information of the new student.
+void Login();
+int IDGenarator();								//Genarates new IDs for the students using an existing file witha counter, or if file deleted it will make a new file, reset, and start from 10,000.
+void UIDFileTest();
+int EntryTest(double dvarname, double dmaxchoice, double dminchoice);
+void SubjectFileTest();
+void SubjectAdder();
+void Fileviewer(string filename);
+void FileEdit(string filename);
+
+int main(void)
+{
+	system("title Simple University Managment System");
+	system("color 07");
+	cout << "\n_Welcome to the SUMS_\n\n";
+
+
+	MainMenu();
+}
+
+void MasterLogin()
+{
+
+}
+
+void MainMenu()
+{
+	double dchoice = 0.0; //variable for storing the user choice regarding the menu option selection.
+
+	do
+	{
+		cout << "1. Sign up a new student.\n2. Edit an existing account.\n3. Exit.\n"; //Providing the user with the options.
+		cin >> dchoice; //Prompting the used to chose an option.
+	} while (EntryTest(dchoice, 4.0, 1) == 1.0);
+
+	system("color 07");
+	
+	int choice = int(dchoice);
+
+	switch (choice) //Displays the options for the user.
+	{
+	case 1: //Sign up.
+	{
+		system("cls"); //Refresh screen.
+		Signup(); //Run the sign up function.
+		MainMenu(); //revert to main menu after the sign up is complete.
+	}
+	case 2: //Login.
+	{
+		system("cls");
+		Login();
+		MainMenu();
+	}
+	case 3: //Exit.
+	{
+		system ("cls");						//Refreshes the screen.
+		cout << "\nThank you for using our system!\n";
+		exit(0);							//Exits the program.
+
+	}
+	default:								//probably no use, because it doesn't work if a char is entered instead of a int, but bad practice if not written. If used *infinite loop commenses at char entry*
+	{
+		cin.clear(choice);
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		system("cls");
+		cout << "\nWrong entery, try again.\a\n";
+		MainMenu();
+	}
+	MainMenu();								//Revert to menu when complete.
+	}
+}
+
+
+void Signup() 
+{
+	struct info								//This Struct cointains variables used to handle student related information.
+	{
+		string
+			name,							//Contains the full Name entered by the user.		
+			email,							//Contains the Email of the student entered by the user.
+			address,						//Contains the house Address of the student entered by the user.
+			subject,						//Contains the Subject of study chosen by the student entered by the user.
+			origin,							//Contains the Origin of the student entered by the user.
+		phonenumber;
+		double
+			dID_Passportnumber = 0.00,		//Contains the Identification number or passport number of the student entered by the user.	
+			dday = 0.00,					//Contains the Day of birth of the student entered by the user.
+			dmonth = 0.00,					//Contains the Month of birth of the student entered by the user.
+			dyear = 0.00,					//Contains the Year of birth of the student entered by the user.
+			//Contains the phone number of the student entered by the user.
+			fee = 0.00,						//Contains the tuition Fee per one semester of the subject chosen by the student.
+			duration = 0.0;					//Contains the Duration of study in Semesters for the subject chosen by the student.
+	};
+	struct info info;
+
+	char personalfilename[10];				//Used to carry the UID to later be attached to ".txt" inorder to create a new file with the name being the UID of the student containing their info.
+
+	struct choiceholders					//Contain the variables used to handle the choices entered by user.
+	{
+		double
+			doriginchoice = 0.0;			//Contains the option entery of the user regarding the origin of the student entered by the user.
+	};
+	struct choiceholders ch;
+
+	struct loopholders						//Contain the variables used to handle all loops and counters.
+	{
+		string
+			lineholder,						//Holds the lines read by the loop from the file.
+			displayedname;					//Holds the names of the subjects found in the subject file to display them.
+		int									//The line number chosen by the user resembeling the Subject chosen.
+			line = 0;						//Holds the lines read by the loop from the file.
+											//Holds the number of the subject displayed / read from the subjects file.
+		double
+			dchosenline = 0.0,
+			subjectcounter = 0.0;
+
+	};
+	struct loopholders lh;
+
+
+ 
+	cout << "\nPlease fill up the information bellow:";
+	cin.ignore();
+	cin.clear();
+	cout << "\nFull name: ";
+	getline(cin, info.name);
+
+	cout << "\nDate of birth [in numeric order ex. (01 or 2019 or 12)]: ";
+	cout << "\nDay: ";
+	
+	do
+	{
+		cin >> info.dday;
+	} while (EntryTest(info.dday, 32.0, 1.0) == 1.0);
+	system("color 07");
+
+	cout << "\nMonth: ";
+	do
+	{
+		cin >> info.dmonth;
+	} while (EntryTest(info.dmonth, 13.0, 1.0) == 1.0);
+	system("color 07");
+
+	cout << "\nYear: ";
+	do
+	{
+		cin >> info.dyear;
+	} while (EntryTest(info.dyear, 9999.0, 1000.0) == 1.0);
+	system("color 07");
+
+	cout << "\nPhone Number: ";
+	
+	cin >> info.phonenumber;
+
+
+	cin.ignore();
+	cin.clear();
+
+	cout << "\nEmail: ";
+	getline(cin, info.email);
+
+	cout << "\nAddress: ";
+	getline(cin, info.address);
+
+	do
+	{
+		cout << "\nSelect Origin: ";
+		cout << "\n1. Local.\n2. Foregin.\n";
+		cin >> ch.doriginchoice;
+		
+	} while (EntryTest(ch.doriginchoice, 3.0, 1.0) == 1);
+	int originchoice = int(ch.doriginchoice);
+	system("color 07");
+
+	switch (originchoice)
+	{
+	case 1:
+	{
+		do
+		{
+			cout << "\nEnter ID: ";
+			cin >> info.dID_Passportnumber;
+
+		} while (EntryTest(info.dID_Passportnumber, 9999999999.0, 999999.0) == 1);
+		info.origin = "Local_Student";
+		break;
+	}
+	case 2:
+	{
+		do
+		{
+			cout << "\nEnter Passport Number: ";
+			cin >> info.dID_Passportnumber;
+
+		} while (EntryTest(info.dID_Passportnumber, 9999999999.0, 999999.0) == 1);
+		info.origin = "Foregin_Student";
+		break;
+	}
+	}
+	int ID_Passportnumber = int(info.dID_Passportnumber);
+	system("color 07");
+
+	SubjectFileTest();
+
+	fstream SubjectData;
+	SubjectData.open("Subject Data.txt");
+
+	fstream Subjects;
+	Subjects.open("Subjects.txt");
+
+	cout << "\nList of available programs, chose one using their number:" << endl;
+
+	while (Subjects >> lh.displayedname)
+	{
+		lh.subjectcounter++;
+		cout << lh.subjectcounter << ". " << lh.displayedname << endl;
+	}
+
+	do
+	{
+		cin >> lh.dchosenline;
+	} while (EntryTest(lh.dchosenline, lh.subjectcounter + 1.0, 1.0) == 1.0);
+	system("color 07");
+
+	if (lh.dchosenline != 1.0)
+	{
+		lh.dchosenline -= 1.0;
+		lh.dchosenline *= 3.0;
+	}
+
+	while (SubjectData >> lh.lineholder)
+	{
+		lh.line++;
+		if (lh.dchosenline == lh.line)
+		{
+			SubjectData >> info.subject >> info.fee >> info.duration;
+			break;
+		}
+	}
+	cout << "\nSubject: " << info.subject << "\nSubject fee per semester: " << info.fee << "\nSemesters: " << info.duration << "\n";
+	SubjectData.close();
+
+	int finalUID = 0;
+	finalUID = IDGenarator() + finalUID; //Genarates unique UIDs.
+
+	cout << "\nNew ID assigned, ID: " << finalUID << " For: " << info.name << ".\n\n"; //Displaying the UID of the student to be registered.
+	sprintf_s(personalfilename, "%d.txt", finalUID); //Connecting the UID to ".txt" and storing the new name in "fileEmulator".
+
+	ofstream personalfile;
+	personalfile.open(personalfilename); //Creating a new personal file with a unique UID containing all the students info.
+
+	ofstream datafile;
+	datafile.open("Data.txt", ios::app); //Creating a new file or editing an existing one named Data.txt containing all student info.
+	if (datafile.fail()) //Testing for availability of the file Data.txt.
+	{
+		ofstream datafile; //Creating a new file if it was not found.
+		datafile.open("Data.txt", ios::app);
+	}
+
+	cin.ignore(); //Clears the variabls.
+
+	personalfile << "ID: " << finalUID << endl;
+	personalfile << "PASSWORD: " << finalUID << endl;
+	personalfile << "\nNAME: " << info.name << endl;
+	personalfile << "BIRTH_DATE: " << info.dday << "." << info.dmonth << "." << info.dyear << endl;
+	personalfile << "PHONE_NUMBER: " << info.phonenumber << endl;
+	personalfile << "EMAIL: " << info.email << endl;
+	personalfile << "ADDRESS: " << info.address << endl;
+	personalfile << "ORIGIN: " << info.origin << endl;
+	personalfile << "IDENTIFICATION_NUMBER: " << ID_Passportnumber << endl;
+	personalfile << "SUBJECT: " << info.subject << endl;
+	personalfile << "SUBJECT_FEE_PER_SEMESTER: " << info.fee << endl;
+	personalfile << "SEMESTER: " << info.duration << endl;
+
+	personalfile.close();
+
+	datafile << "\n\n\nID: " << finalUID << endl;
+	datafile << "PASSWORD: " << finalUID << endl;
+	datafile << "\nNAME: " << info.name << endl;
+	datafile << "BIRTH_DATE: " << info.dday << "." << info.dmonth << "." << info.dyear << endl;
+	datafile << "PHONE_NUMBER: " << info.phonenumber << endl;
+	datafile << "EMAIL: " << info.email << endl;
+	datafile << "ADDRESS: " << info.address << endl;
+	datafile << "ORIGIN: " << info.origin << endl;
+	datafile << "IDENTIFICATION_NUMBER: " << ID_Passportnumber << endl;
+	datafile << "SUBJECT: " << info.subject << endl;
+	datafile << "SUBJECT_FEE_PER_SEMESTER: " << info.fee << endl;
+	datafile << "SEMESTER: " << info.duration << endl;
+
+	datafile.close();
+	
+}
+
+
+void Login()
+{
+	double denteredID;
+	double dchoice = 0.0;
+	int fileID = 0;
+	int line = 0;
+	int ln = 0;
+	int ID = 0;
+	char personalfilename [12];
+	string enteredpassword, password;
+
+	cin.ignore();
+	cin.clear();
+	system("CLS");
+	
+	ID:
+	do
+	{
+		cout << "\nPlease enter your ID: ";
+		cin >> denteredID;
+	} while (EntryTest(denteredID, 99999.0, 10000.0) == 1);
+	int enteredID = int(denteredID);
+
+
+
+	sprintf_s(personalfilename, "%d.txt", enteredID);
+
+	fstream personaltest1;
+	personaltest1.open(personalfilename);
+	if (personaltest1.fail())
+	{
+		goto ID;
+	}
+	system("color 07");
+
+	line = 3;
+	string test;
+	while (personaltest1 >> test)
+	{
+		ln++;
+		if (line == ln)
+		{
+			personaltest1 >> password;
+			break;
+		}
+	}
+
+	cout << "\nPlease enter the password: ";
+	cin >> enteredpassword;
+	while (enteredpassword != password)
+	{
+		cout << "\nWrong Password.";
+		cout << "\nPlease reenter the password: ";
+		cin >> enteredpassword;
+		system("CLS");
+	}
+
+	cin.ignore();
+	cin.clear();
+	system("color 07");
+	system("CLS");
+	cout << "\nWelcome.\n";
+
+	do
+	{
+		cout << "\n1. View profile." << endl;
+		cout << "\n2. Edit profile." << endl;
+		cout << "\n3. Delete profile." << endl;
+		cin >> dchoice;
+	} while (EntryTest(dchoice, 4.0, 1.0) == 1.0);
+	int choice = int(dchoice);
+
+	switch (choice)
+	{
+	case 1:
+	{
+		Fileviewer(personalfilename);
+		MainMenu();
+	}
+	case 2:
+	{
+		FileEdit(personalfilename);
+		MainMenu();
+	}
+	case 3:
+	{
+
+	}
+	}
+
+}
+
+void FileEdit(string filename)
+{
+	cout << "\nPlease the number of the line you wish to edit: ";
+	int line;
+	cin >> line;
+	cout << "\nPlease enter the correction of the selected line: ";
+	string correction;
+	cin.ignore();
+	getline(cin, correction);
+	string test1,test2;
+	ifstream pt1;
+	ofstream pt2;
+	pt2.open("buffer.txt");
+	pt1.open(filename);
+	int ln = 0;
+	while (pt1 >> test1)
+	{
+		ln++;
+		if (line == ln)
+		{
+			pt2 << correction << "\n";
+		}
+		else
+		{
+			pt2 << test1 << "\n";
+		}
+	}
+	pt1.close();
+	pt2.close();
+	ifstream pt3("buffer.txt");
+	ofstream pt4(filename);
+
+	while (pt3 >> test2)
+	{
+		pt4 << test2 << "\n";
+	}
+	cout << "\n";
+}
+
+void Fileviewer(string filename)
+{
+	string textline;
+	fstream personalfile;
+	personalfile.open(filename);
+	cout << "\n\nProfile is being viewed:\n" << endl;
+	while (personalfile >> textline)
+	{
+		cout << "\n" << textline;
+	}
+	cout << "\n\nThank you.\n";
+}
+
+void UIDFileTest()
+{
+	fstream UIDfile;
+	UIDfile.open("UID.txt");
+	if (UIDfile.fail())
+	{
+		ofstream UIDfile;
+		UIDfile.open("UID.txt");
+		UIDfile << 9999 << endl;
+	}
+	UIDfile.close();
+}
+
+int IDGenarator()
+{
+	UIDFileTest();
+	int UID;
+	ifstream UIDfile1;
+	UIDfile1.open("UID.txt");
+	UIDfile1 >> UID;
+	UIDfile1.close();
+	UID++;
+	ofstream UIDfile2;
+	UIDfile2.open("UID.txt");
+	UIDfile2 << UID << endl;
+	UIDfile2.close();
+	return(UID);
+}
+
+int EntryTest(double dvarname, double dmaxchoice, double dminchoice)
+{
+	int identifier = 0;
+
+	if (dvarname < dmaxchoice && dvarname >= dminchoice) //Testing for the validity of the user entry (numberwise).
+	{
+		if (cin.fail()) //If the user entry failed to be a number; the following happnes:
+		{
+			system("color 04");
+			cin.clear(); //The Errors of a wrong entry are cleared.
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); //The Variable is cleared.
+			cout << "\nWrong entry (a letter was entered instead of a number), please try again.\a\n"; //Informing the user of the wrong entry.
+			identifier = 1;
+		}
+	}
+	else //If the test passed (numberwise), it'll check if the number is within range. If not the same procedure above is taken.
+	{
+		system("color 04");
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		cout << "\nWrong entry (a wrong number was entered), please try again.\a\n";
+		identifier = 1;
+	}
+	return identifier;
+}
+
+void SubjectFileTest()
+{
+	fstream SubjectData;
+	SubjectData.open("Subject Data.txt");
+	if (SubjectData.fail())
+	{
+		ofstream SubjectData;
+		SubjectData.open("Subject Data.txt");
+		SubjectData << "Medicine 12250.00 14" << endl;
+		SubjectData << "Phsycology 2750.00 10" << endl;
+		SubjectData << "Mechatronics 3450.00 8" << endl;
+		SubjectData << "Engineering 3450.00 8" << endl;
+		SubjectData << "Computer_Science 3450.00 6" << endl;
+		SubjectData << "IT 3450 6" << endl;
+		SubjectData << "International_Business 3450.00 6" << endl;
+
+	}
+	SubjectData.close();
+
+	fstream Subjects;
+	Subjects.open("Subjects.txt");
+	if (Subjects.fail())
+	{
+		ofstream Subjects;
+		Subjects.open("Subjects.txt");
+		Subjects << "Medicine" << endl;
+		Subjects << "Phsycology" << endl;
+		Subjects << "Mechatronics" << endl;
+		Subjects << "Engineering" << endl;
+		Subjects << "Computer_Science" << endl;
+		Subjects << "IT" << endl;
+		Subjects << "International_Business" << endl;
+
+	}
+	Subjects.close();
+
+}
+
+void SubjectAdder()
+{
+	string
+		subjectname;
+	double
+		fees,
+		semesternumber;
+	int
+		choice = 0;
+
+	cout << "\nPlease fill up the information bellow to add a subject (do not enter any spaces, use _ instead):";
+	cin.ignore();
+	cout << "\nSubject Name: "; getline(cin, subjectname);
+	cin.ignore();
+	cout << "\nFees per semester: "; cin >> fees;
+	cin.ignore();
+	cout << "\nNumber of semesters: "; cin >> semesternumber;
+
+	ofstream SubjectData;
+	SubjectData.open("Subject Data.txt", ios::app);
+	SubjectData << subjectname << " " << fees << " " << semesternumber << endl;
+
+	ofstream Subjects;
+	Subjects.open("Subjects.txt", ios::app);
+	Subjects << subjectname << endl;
+
+	cout << "\n\nDo you want to add another Subject or exit to menu?";
+	cout << "\n1. Add another subject.";
+	cout << "\n2. Exit to menu.";
+	cin.ignore();
+	cin >> choice;
+	if (choice == 1)
+	{
+		SubjectAdder();
+	}
+	MainMenu();
+}
